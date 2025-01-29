@@ -10,7 +10,6 @@ class PredictionService:
         self.data = {}
 
     def configure_model(self, branch_name: str) -> Prophet:
-        """Configura un modelo Prophet específico para una sucursal"""
         model = Prophet(
             yearly_seasonality=True,
             weekly_seasonality=True,
@@ -18,10 +17,8 @@ class PredictionService:
             interval_width=0.95
         )
         
-        # Añadir festivos suizos
         model.add_country_holidays(country_name='CH')
         
-        # Añadir estacionalidades personalizadas para restaurantes
         model.add_seasonality(
             name='lunch_rush',
             period=0.5,
@@ -37,14 +34,12 @@ class PredictionService:
         return model
 
     def get_historical_data(self, branch_name: str) -> pd.DataFrame:
-        """Obtiene datos históricos para una sucursal específica"""
         dates = pd.date_range(
             start='2024-01-01',
             end='2024-12-31',
             freq='D'
         )
         
-        # Simulamos patrones realistas para un restaurante
         base_sales = 1000
         weekly_pattern = [1.2, 0.8, 0.8, 0.9, 1.0, 1.5, 1.3]
         
@@ -64,7 +59,6 @@ class PredictionService:
         })
 
     async def train_model(self, branch_name: str) -> None:
-        """Entrena el modelo para una sucursal específica"""
         data = self.get_historical_data(branch_name)
         model = self.configure_model(branch_name)
         model.fit(data)
@@ -73,30 +67,25 @@ class PredictionService:
         self.data[branch_name] = data
 
     async def get_predictions(self, request: PredictionRequest) -> PredictionResponse:
-        """Genera predicciones para una sucursal"""
         if request.branch_name not in self.models:
             await self.train_model(request.branch_name)
         
         model = self.models[request.branch_name]
         historical_data = self.data[request.branch_name]
         
-        # Generar predicciones
         future = model.make_future_dataframe(periods=request.periods)
         forecast = model.predict(future)
         
-        # Calcular métricas
         total_sales = historical_data['y'].sum()
         average_daily_sales = historical_data['y'].mean()
         trend = ((forecast['yhat'].iloc[-1] - forecast['yhat'].iloc[0]) / 
                 forecast['yhat'].iloc[0] * 100)
         
-        # Calcular métricas de rendimiento
         historical_forecast = model.predict(model.history)
         mae = np.mean(np.abs(historical_data['y'] - historical_forecast['yhat']))
         mape = np.mean(np.abs((historical_data['y'] - historical_forecast['yhat']) / 
                               historical_data['y'])) * 100
         
-        # Formatear predicciones
         predictions = [
             Prediction(
                 date=row['ds'].strftime('%Y-%m-%d'),

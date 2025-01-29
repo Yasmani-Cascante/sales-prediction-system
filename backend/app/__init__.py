@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes.prediction_routes import prediction_router
+from .routes.prediction_routes import prediction_router
 
 app = FastAPI(
     title="Sistema de Predicción de Ventas",
