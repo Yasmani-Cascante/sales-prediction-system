@@ -1,12 +1,5 @@
-from flask import Flask
-from flask_cors import CORS
+import uvicorn
 
-app = Flask(__name__)
-CORS(app)
-
-@app.route('/')
-def hello_world():
-    return {'message': 'Sistema de Predicción de Ventas API'}
-
-if __name__ == '__main__':
-    app.run(debug=True)
+if __name__ == "__main__":
+    # uvicorn.run("app:app", host="0.0.0.0", port=5000, reload=True)
+    uvicorn.run("app:app", host="localhost", port=5000, reload=True)

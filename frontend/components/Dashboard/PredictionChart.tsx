@@ -14,10 +14,9 @@ import {
 
 interface PredictionData {
   date: string;
-  actual: number;
-  predicted: number;
-  lower_bound?: number;
-  upper_bound?: number;
+  predicted_value: number;
+  lower_bound: number;
+  upper_bound: number;
 }
 
 interface PredictionChartProps {
@@ -26,12 +25,14 @@ interface PredictionChartProps {
 }
 
 const PredictionChart = ({ data, isLoading = false }: PredictionChartProps) => {
+  console.log("PredictionChart", data);
+  
   if (isLoading) {
-    return <div className="h-96 flex items-center justify-center">Cargando...</div>;
+    return <div className="h-96 flex items-center justify-center">Cargando predicciones...</div>;
   }
 
   return (
-    <div className="w-full h-96 bg-white p-4 rounded-lg shadow-lg">
+    <div className="w-full h-96 bg-white" style={{height: '200px'}}>
       <ResponsiveContainer>
         <LineChart
           data={data}
@@ -49,36 +50,25 @@ const PredictionChart = ({ data, isLoading = false }: PredictionChartProps) => {
           <Legend />
           <Line
             type="monotone"
-            dataKey="actual"
+            dataKey="predicted_value"
             stroke="#8884d8"
-            name="Ventas Reales"
+            name="Predicción"
             strokeWidth={2}
           />
           <Line
             type="monotone"
-            dataKey="predicted"
+            dataKey="lower_bound"
             stroke="#82ca9d"
-            name="Predicción"
-            strokeWidth={2}
+            strokeDasharray="5 5"
+            name="Límite Inferior"
           />
-          {data[0]?.lower_bound && (
-            <Line
-              type="monotone"
-              dataKey="lower_bound"
-              stroke="#82ca9d"
-              strokeDasharray="5 5"
-              name="Límite Inferior"
-            />
-          )}
-          {data[0]?.upper_bound && (
-            <Line
-              type="monotone"
-              dataKey="upper_bound"
-              stroke="#82ca9d"
-              strokeDasharray="5 5"
-              name="Límite Superior"
-            />
-          )}
+          <Line
+            type="monotone"
+            dataKey="upper_bound"
+            stroke="#ffc658"
+            strokeDasharray="5 5"
+            name="Límite Superior"
+          />
         </LineChart>
       </ResponsiveContainer>
     </div>

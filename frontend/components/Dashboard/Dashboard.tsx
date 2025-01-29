@@ -25,8 +25,7 @@ const Dashboard = () => {
     const fetchPredictions = async () => {
       setIsLoading(true);
       try {
-        // TODO: Reemplazar con llamada real a la API
-        const response = await fetch(`http://localhost:5000/predict`, {
+        const response = await fetch(`http://localhost:5000/api/predict`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -43,16 +42,19 @@ const Dashboard = () => {
 
         const data = await response.json();
         setPredictionData(data.predictions || []);
+        console.log("setPredictionData", data);
         
-        // Actualizar métricas
-        setMetrics({
-          totalSales: data.total_sales || 0,
-          averageAccuracy: data.accuracy || 0,
-          trend: data.trend || 0,
-        });
+        // Actualizar métricas con la nueva estructura de respuesta
+        if (data.metrics && data.model_performance) {
+          setMetrics({
+            totalSales: data.metrics.total_sales || 0,
+            averageAccuracy: data.model_performance.accuracy || 0,
+            trend: data.metrics.trend_percentage || 0,
+          });
+        }
       } catch (error) {
         console.error('Error:', error);
-        // TODO: Manejar el error apropiadamente
+        // TODO: Implementar manejo de errores con notificaciones
       } finally {
         setIsLoading(false);
       }
