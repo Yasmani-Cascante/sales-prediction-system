@@ -6,15 +6,16 @@ import BranchSelector from './BranchSelector';
 import MetricCard from './MetricCard';
 
 const branches = [
-  { id: 'zurich_central', name: 'Zurich Central' },
-  { id: 'geneva_lake', name: 'Geneva Lake View' },
-  { id: 'lausanne_main', name: 'Lausanne Main' },
+  { id: 'Zurich', name: 'Zurich' },
+  { id: 'Geneva', name: 'Geneva Lake View' },
+  { id: 'Lausanne', name: 'Lausanne Main' },
 ];
 
 const Dashboard = () => {
   const [selectedBranch, setSelectedBranch] = useState(branches[0].id);
   const [isLoading, setIsLoading] = useState(false);
   const [predictionData, setPredictionData] = useState([]);
+  const [error, setError] = useState('');
   const [metrics, setMetrics] = useState({
     totalSales: 0,
     averageAccuracy: 0,
@@ -24,8 +25,9 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchPredictions = async () => {
       setIsLoading(true);
+      setError('');
       try {
-        const response = await fetch(`http://localhost:5000/api/predict`, {
+        const response = await fetch(`http://localhost:8000/api/predict`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -33,18 +35,23 @@ const Dashboard = () => {
           body: JSON.stringify({
             branch_name: selectedBranch,
             periods: 30,
+            frequency: "D"
           }),
         });
 
         if (!response.ok) {
-          throw new Error('Error al obtener predicciones');
+          const errorData = await response.json();
+          throw new Error(errorData.detail || 'Error al obtener predicciones');
         }
 
         const data = await response.json();
-        setPredictionData(data.predictions || []);
-        console.log("setPredictionData", data);
+        if (!data.predictions || !Array.isArray(data.predictions)) {
+          throw new Error('Formato de datos inválido');
+        }
+
+        setPredictionData(data.predictions);
+        console.log("Prediction Data:", data.predictions);
         
-        // Actualizar métricas con la nueva estructura de respuesta
         if (data.metrics && data.model_performance) {
           setMetrics({
             totalSales: data.metrics.total_sales || 0,
@@ -54,7 +61,13 @@ const Dashboard = () => {
         }
       } catch (error) {
         console.error('Error:', error);
-        // TODO: Implementar manejo de errores con notificaciones
+        setError(error.message);
+        setPredictionData([]);
+        setMetrics({
+          totalSales: 0,
+          averageAccuracy: 0,
+          trend: 0,
+        });
       } finally {
         setIsLoading(false);
       }
@@ -76,6 +89,12 @@ const Dashboard = () => {
             onBranchChange={setSelectedBranch}
           />
         </div>
+
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-8">
+            {error}
+          </div>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <MetricCard
@@ -101,7 +120,9 @@ const Dashboard = () => {
           <h2 className="text-xl font-semibold text-gray-900 mb-4">
             Predicción de Ventas
           </h2>
-          <PredictionChart data={predictionData} isLoading={isLoading} />
+          <div className="aspect-[16/9] w-full">
+            <PredictionChart data={predictionData} isLoading={isLoading} />
+          </div>
         </div>
       </div>
     </div>
