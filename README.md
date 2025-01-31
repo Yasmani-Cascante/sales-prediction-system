@@ -1,6 +1,6 @@
 # Sistema de Predicción de Ventas
 
-Sistema de predicción de ventas usando Prophet y FastAPI para análisis y pronósticos de ventas en restaurantes.
+Sistema de predicción de ventas usando scikit-learn (RandomForestRegressor) y FastAPI para análisis y pronósticos de ventas en restaurantes.
 
 ## Estructura del Proyecto
 
@@ -18,6 +18,14 @@ sales-prediction-system/
     ├── components/        # Componentes React reutilizables
     └── package.json       # Dependencias del frontend
 ```
+
+## Modelo de Predicción
+
+El sistema utiliza RandomForestRegressor de scikit-learn para las predicciones de ventas, incorporando:
+- Análisis de tendencias temporales
+- Patrones estacionales (diarios, semanales, mensuales)
+- Intervalos de confianza basados en la variabilidad del modelo
+- Métricas de rendimiento (MAE, MAPE, Accuracy)
 
 ## Requisitos
 
@@ -53,7 +61,7 @@ npm install
 ```bash
 cd backend
 .\venv\Scripts\activate  # En Windows
-python app.py
+uvicorn app.main:app --reload
 ```
 
 2. Iniciar el frontend:
@@ -65,22 +73,18 @@ npm run dev
 ## Uso
 
 - Frontend: http://localhost:3000
-- Backend API: http://localhost:5000
-- Documentación API: http://localhost:5000/docs
+- Backend API: http://localhost:8000
+- Documentación API: http://localhost:8000/docs
 
 ## Características
 
-- Predicción de ventas usando Prophet
+- Predicción de ventas usando RandomForestRegressor
+- Análisis de tendencias y estacionalidad
+- Intervalos de confianza para predicciones
 - Dashboard interactivo con gráficos
 - API RESTful con FastAPI
 - Documentación automática con Swagger
 - Soporte para múltiples sucursales
-
-## Desarrollo
-
-- Backend: FastAPI + Prophet
-- Frontend: Next.js + React + Recharts
-- Documentación: Swagger/OpenAPI
 
 ## API Endpoints
 
@@ -90,6 +94,36 @@ npm run dev
     - `branch_name`: Nombre de la sucursal
     - `periods`: Número de períodos a predecir (default: 30)
     - `frequency`: Frecuencia de predicción (default: "D" para diario)
+  - Respuesta:
+    - Predicciones diarias con intervalos de confianza
+    - Métricas de rendimiento del modelo
+    - Estadísticas de ventas
+
+## Dashboard
+
+El dashboard incluye:
+- Selector de sucursales
+- Gráfico de predicciones con intervalos de confianza
+- Métricas clave:
+  - Ventas totales
+  - Precisión del modelo
+  - Tendencia de ventas
+- Visualización responsiva y adaptable
+
+## Tecnologías
+
+- Backend:
+  - FastAPI
+  - scikit-learn
+  - pandas
+  - numpy
+- Frontend:
+  - Next.js
+  - React
+  - Recharts
+  - Tailwind CSS
+- Documentación:
+  - Swagger/OpenAPI
 
 ## Licencia
 
